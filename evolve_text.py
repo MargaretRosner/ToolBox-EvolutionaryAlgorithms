@@ -94,6 +94,24 @@ class Message(list):
 
 # TODO: Implement levenshtein_distance function (see Day 9 in-class exercises)
 # HINT: Now would be a great time to implement memoization if you haven't
+def levenshtein_distance(s,t):
+    s = ' ' + s
+    t = ' ' + t
+    d = {}
+    S = len(s)
+    T = len(t)
+    for i in range(S):
+        d[i, 0] = i
+    for j in range (T):
+        d[0, j] = j
+    for j in range(1,T):
+        for i in range(1,S):
+            if s[i] == t[j]:
+                d[i, j] = d[i-1, j-1]
+            else:
+                d[i, j] = min(d[i-1, j], d[i, j-1], d[i-1, j-1]) + 1
+    return d[S-1, T-1]
+
 
 def evaluate_text(message, goal_text, verbose=VERBOSE):
     """
@@ -121,8 +139,26 @@ def mutate_text(message, prob_ins=0.05, prob_del=0.05, prob_sub=0.05):
     """
 
     if random.random() < prob_ins:
+        random_inserted = random.randint(0,10)
+        index_values = len(message)
+        index = random.randint(0,index_values)
+        message = message.insert(index,random_inserted)
+        #message = message[:index] + [random_inserted] + message[index:]
+
+    elif random.random() < prob_del:
+        index_values = len(message)
+        index = random.randint(0,index_values)
+        message.pop(index)
+
+    elif random.random() < prob_sub:
+        random_sub = random.randint(0,10)
+        index_values = len(message)
+        index = random.randint(0,index_values)
+        message.pop(index)
+        message = message.insert(index,random_sub)
+
         # TODO: Implement insertion-type mutation
-        pass
+        #pass
 
     # TODO: Also implement deletion and substitution mutations
     # HINT: Message objects inherit from list, so they also inherit
@@ -144,6 +180,7 @@ def get_toolbox(text):
     toolbox = base.Toolbox()
 
     # Creating population to be evolved
+
     toolbox.register("individual", Message)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
